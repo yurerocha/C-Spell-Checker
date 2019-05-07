@@ -14,7 +14,7 @@
 
 typedef struct SinglyinkedList {
     char *str;
-    unsigned int quant;
+    char found_flag;
     struct SinglyinkedList *next;
 } sllist_t;
 

@@ -61,10 +61,14 @@ int main (int argc, char *argv[])
     // Calculating the cpu_time to check 
     cpu_time = (end-start) / (double) CLOCKS_PER_SEC;
 
+    puts ("(!)Processing results(!)");
     // Elimitating words that were found in the dict file
     ProcessList (buffer_p);
+    puts ("(!)Done processing results(!)");
 
+    puts ("(!)Saving results to file(!)");
     SaveResultsToFile ("result.txt", total_nwords, buffer_p->size, cpu_time, buffer_p->head);
+    puts ("(!)Done saving results to file(!)");
 
     // Deallocating memory
     SLLDeallocate (buffer_p->head);

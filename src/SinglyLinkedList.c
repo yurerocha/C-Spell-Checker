@@ -21,9 +21,9 @@ void SLLPrepend (sll_descriptor_t **list_p, const char *str)
     // Makes room for the string according to its size
     new_node_p->str = malloc (sizeof (char) * str_len);
 
-    // Initializing the quant data. Here, it serves as a flag and the program 
-    // starts off by assuming that all words from the file were FOUND in the dict.
-    new_node_p->quant = FOUND;
+    // Initializing the found_flag data. The program starts off by assuming 
+    // that all words from the file were FOUND in the dict.
+    new_node_p->found_flag = FOUND;
 
     // Copys the string into the node data
     strcpy (new_node_p->str, str);
@@ -44,9 +44,9 @@ int SLLPrint (const sllist_t *node_p)
     const sllist_t *temp_p = node_p;
 
     while (temp_p != NULL) {
-        // if (temp_p->quant == FOUND)
+        // if (temp_p->found_flag == FOUND)
          printf ("%s", temp_p->str);
-         printf ("%d\n", temp_p->quant);
+         printf ("%d\n", temp_p->found_flag);
         temp_p = temp_p->next;
     }
 }
@@ -69,7 +69,7 @@ sll_descriptor_t *LoadFileFromDiskIntoList (const char *filename_p)
     FILE *file_p;
     char buffer[BUFFER_SIZE];
     char ch, ch_prev;
-    size_t buffer_counter; // Counts the characters in the buff
+    size_t buffer_counter; // Counts the characters in the buffer
     sll_descriptor_t *list_p;
     
     SLLInit (&list_p);
@@ -84,13 +84,12 @@ sll_descriptor_t *LoadFileFromDiskIntoList (const char *filename_p)
     ch_prev = '\0';
     while ( (ch = fgetc (file_p)) != EOF) {
 
-        // When it happens, buff has a word formed
-        if (isalpha(ch_prev) && (ch == ' ' || ch == '\n')) {
+        // When it happens, buffer has a word formed
+        if (isalpha(ch_prev) && (ch == ' ' || ch == '\n' || (ispunct(ch) && ch != '-'))) {
             buffer[buffer_counter] = '\0';
             buffer_counter = 0;
             SLLPrepend (&list_p, buffer);
-            //printf ("%d\n", i++);
-        } else if (isalpha(ch) || ( isalpha(ch_prev) && (ch == '-' || ch == '\''))){
+        } else if (isalpha(ch) || ( isalpha(ch_prev) && (ch == '-' || ch == '\''))){ // Ignoring '-' and '\''
             buffer[buffer_counter] = ch;
             buffer_counter++;
         }
@@ -114,8 +113,8 @@ int ProcessList (sll_descriptor_t *list_p)
 
     while (node_p != NULL && node_p->next != NULL) {
 
-        // All nodes with quant equals to FOUND are removed. All but the fisrt, actually
-        if (node_p->next->quant == FOUND) {
+        // All nodes with found_flag equals to FOUND are removed. All but the fisrt, actually
+        if (node_p->next->found_flag == FOUND) {
             temp_p = node_p->next;
             node_p->next = node_p->next->next;
 
@@ -129,8 +128,8 @@ int ProcessList (sll_descriptor_t *list_p)
             node_p = node_p->next;
     }
 
-    // If the quant data of the first node is FOUND, remove it from the list
-    if (list_p->head != NULL && list_p->head->quant == FOUND) {
+    // If the found_flag data of the first node is FOUND, remove it from the list
+    if (list_p->head != NULL && list_p->head->found_flag == FOUND) {
         temp_p = list_p->head;
         list_p->head = list_p->head->next;
 
@@ -149,8 +148,6 @@ int ProcessList (sll_descriptor_t *list_p)
         while (temp_p->next != NULL){
             // While the strings from node_p and temp_p->next are equal, keep removing temp_p->next
             if (!strcmp(node_p->str, temp_p->next->str)) {
-                // Now quant serves as a counter
-                node_p->quant++;
                 aux_p = temp_p->next;
                 temp_p->next = temp_p->next->next;
                 free (aux_p->str);
@@ -171,6 +168,7 @@ int SaveResultsToFile (char *filename_p, int total_nwords, int failed_nwords, do
 {
     FILE *result_file_p;
     sllist_t *temp_p;
+    int i = 1;
 
     result_file_p = fopen (filename_p, "w");
 
@@ -181,12 +179,12 @@ int SaveResultsToFile (char *filename_p, int total_nwords, int failed_nwords, do
     fprintf (result_file_p, "Total time of verification: %.2fms\n", verif_time*1000);
     fprintf (result_file_p, "Number of words that failed on spell checking: %d\n", failed_nwords);
     fprintf (result_file_p, "List of of words that failed on spell checking: \n");
-    fprintf (result_file_p, "[number of ocurrences - word]\n");
+    fprintf (result_file_p, "[occurence - word]\n");
     fprintf (result_file_p, "------------------------------------------------------------\n");
 
     temp_p = list_p;
     while (temp_p != NULL) {
-        fprintf (result_file_p, "%5d - %s\n", temp_p->quant, temp_p->str);
+        fprintf (result_file_p, "%4d - %s\n", i++,temp_p->str);
         temp_p = temp_p->next;
     }
 

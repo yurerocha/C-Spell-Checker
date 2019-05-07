@@ -28,7 +28,7 @@ unsigned int HashFunction (unsigned int key, unsigned int i)
     return ((key % HASH_TABLE_SIZE) + i*(1 + key % (HASH_TABLE_SIZE-1))) % HASH_TABLE_SIZE;
 }
 
-// Se considerássemos as palavras diretamente como keys, seria difícil saber quanto espaço reservar para cada.
+// Se considerássemos as palavras diretamente como keys, seria difícil saber found_flago espaço reservar para cada.
 // Por isso, as keys são na verdade um prehash.
 int InsertWordIntoHashTable (hash_table_t *hash_table_p, const char *word) 
 {   
@@ -95,9 +95,8 @@ void CheckHashTable (const hash_table_t *hash_table_p, sllist_t *buffer_p)
 
     while (temp_p) {
         if (SearchWordInHashTable (hash_table_p, temp_p->str) == NOT_FOUND) {
-            // quants value is 1, by default. It means that the word was FOUND in dict
-            // Here, quant serves as a flag, indicating that the word was NOT_FOUND
-            temp_p->quant = NOT_FOUND;
+            // found_flag value is FOUND, by default. It means that the word was FOUND in dict
+            temp_p->found_flag = NOT_FOUND;
     }
             
         temp_p = temp_p->next;
